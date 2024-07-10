@@ -231,13 +231,13 @@ impl Wav {
         self.handle_bit(key, sample_sum, size, 32768f32);
     }
 
-    fn handle24bit(&mut self, key: u32, sample_sum: i64, size: u32) {
-        self.handle_bit(key, sample_sum, size, 8388608f32);
-    }
+    // fn handle24bit(&mut self, key: u32, sample_sum: i64, size: u32) {
+    //     self.handle_bit(key, sample_sum, size, 8388608f32);
+    // }
 
-    fn handle32bit(&mut self, key: u32, sample_sum: i64, size: u32) {
-        self.handle_bit(key, sample_sum, size, 2147483648f32);
-    }
+    // fn handle32bit(&mut self, key: u32, sample_sum: i64, size: u32) {
+    //     self.handle_bit(key, sample_sum, size, 2147483648f32);
+    // }
 
     fn handle_bit(&mut self, key: u32, sample_sum: i64, size: u32, scope: f32) {
         let sample_arr = self.sample_data.get_mut(&key).unwrap();

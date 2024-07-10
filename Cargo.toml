@@ -2,6 +2,14 @@
 name = "wav2json"
 version = "0.1.0"
 edition = "2021"
+authors = ["caojianyu"]
+license = "MIT"
+description = "A library that decodes wav audio files into json waveform data"
+readme = "README.md"
+homepage = "https://github.com/caojianyu/wav2json"
+repository = "https://github.com/caojianyu/wav2json"
+keywords = ["audio", "waveform"]
+categories = ["library"]
 
 [dependencies]
 reqwest = { version = "0.12.5", features = ["blocking"] }
