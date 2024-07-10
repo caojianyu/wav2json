@@ -9,7 +9,8 @@ readme = "README.md"
 homepage = "https://github.com/caojianyu/wav2json"
 repository = "https://github.com/caojianyu/wav2json"
 keywords = ["audio", "waveform"]
-categories = ["library"]
+categories = ["algorithms"]
+
 exclude = ["examples/*"]
 
 [dependencies]
