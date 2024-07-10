@@ -2,6 +2,33 @@
 
 A library that decodes wav audio files into json waveform data
 
+[![Crates.io](https://img.shields.io/crates/v/wav2json.svg)](https://crates.io/crates/wav2json)
+[![Documentation](https://docs.rs/wav2json/badge.svg)][dox]
+
+More information about this crate can be found in the [crate
+documentation][dox].
+
+[dox]: https://docs.rs/wav2json
+
+## Usage
+
+To use `wav2json`, first add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+wav2json = "0.1.0"
+```
+
+Next, add this to your crate:
+
+```rust
+use wav2json::Wav;
+
+fn main() {
+    // ...
+}
+```
+
 ## Examples
 
 Generate a json waveform data file:
