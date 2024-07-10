@@ -1,4 +1,4 @@
-# wave2json
+# wav2json
 
 A library that decodes wav audio files into json waveform data
 
