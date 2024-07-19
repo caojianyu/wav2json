@@ -58,7 +58,7 @@ fn main() {
 
 Copy the resulting json data into the index.html file, and then open the web page to see the effect as shown in the following image
 
-![Waveform picture](/examples/example.png)
+![Waveform picture](https://github.com/caojianyu/wav2json/blob/main/examples/example.png)
 
 ## License
 
