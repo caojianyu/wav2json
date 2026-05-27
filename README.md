@@ -16,7 +16,7 @@ To use `wav2json`, first add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-wav2json = "0.1.0"
+wav2json = "0.2.0"
 ```
 
 Next, add this to your crate:

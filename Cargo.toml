@@ -1,6 +1,6 @@
 [package]
 name = "wav2json"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jianyu Cao <jienicao26@gmail.com>"]
 license = "MIT"
@@ -11,7 +11,12 @@ repository = "https://github.com/caojianyu/wav2json"
 keywords = ["audio", "waveform"]
 categories = ["algorithms"]
 
-exclude = ["examples/*"]
+exclude = [
+    "examples/data.json",
+    "examples/example.png",
+    "examples/index.html",
+    "examples/sample-15s.wav",
+]
 
 [dependencies]
 reqwest = { version = "0.12.5", features = ["blocking"] }
