@@ -344,7 +344,8 @@ impl Wav {
             8 => {
                 let mut buf = [0u8; 1];
                 self.read_exact(&mut buf)?;
-                Ok((buf[0] as i64).pow(2))
+                let sample = buf[0] as i16 - 128;
+                Ok((sample as i64).pow(2))
             }
             16 => Ok((self.read_i16()? as i64).pow(2)),
             bits => Err(WavError::UnsupportedBitsPerSample(bits)),
@@ -353,11 +354,11 @@ impl Wav {
 
     fn handle_bit(&mut self, key: usize, sample_sum: i64, size: u32) {
         let scope = match self.bits_per_sample {
-            8 => 128f32,
-            16 => 32768f32,
+            8 => 128.0,
+            16 => 32768.0,
             _ => unreachable!("bits per sample is validated before decoding"),
         };
-        let data = cal_rms(sample_sum as f32 / scope, size);
+        let data = cal_rms(sample_sum, size, scope);
         self.sample_data[key].push(data);
     }
 
@@ -422,8 +423,8 @@ impl Wav {
 }
 
 /// rms algorithm.
-fn cal_rms(sample_sum: f32, size: u32) -> f64 {
-    (sample_sum / size as f32).sqrt() as f64
+fn cal_rms(sample_sum: i64, size: u32, scope: f64) -> f64 {
+    (sample_sum as f64 / size as f64).sqrt() / scope
 }
 
 fn round2(value: f64) -> f64 {
@@ -433,6 +434,7 @@ fn round2(value: f64) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{env, fs, path::PathBuf, process};
 
     #[test]
     fn decode_with_configured_width() {
@@ -456,5 +458,74 @@ mod tests {
             .unwrap()
             .set_json_width(0);
         assert!(matches!(wav.decode(), Err(WavError::InvalidJsonWidth)));
+    }
+
+    #[test]
+    fn eight_bit_pcm_silence_is_centered_at_zero() {
+        let path = write_test_wav("eight_bit_pcm_silence_is_centered_at_zero", 1, 8, &[128]);
+        let mut wav = Wav::new(path.to_str().unwrap()).unwrap();
+        let result_data = wav.decode().unwrap();
+
+        assert_eq!(result_data, vec![0.0]);
+
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn sixteen_bit_rms_is_normalized_after_averaging() {
+        let mut samples = Vec::new();
+        samples.extend_from_slice(&16384i16.to_le_bytes());
+        samples.extend_from_slice(&(-16384i16).to_le_bytes());
+
+        let path = write_test_wav(
+            "sixteen_bit_rms_is_normalized_after_averaging",
+            1,
+            16,
+            &samples,
+        );
+        let mut wav = Wav::new(path.to_str().unwrap()).unwrap().set_json_width(1);
+        let result_data = wav.decode().unwrap();
+
+        assert_eq!(result_data.len(), 1);
+        assert!((result_data[0] - 0.5).abs() < f64::EPSILON);
+
+        fs::remove_file(path).unwrap();
+    }
+
+    fn write_test_wav(
+        test_name: &str,
+        channels: u16,
+        bits_per_sample: u16,
+        samples: &[u8],
+    ) -> PathBuf {
+        let mut path = env::temp_dir();
+        path.push(format!("wav2json-{test_name}-{}.wav", process::id()));
+
+        fs::write(&path, wav_bytes(channels, bits_per_sample, samples)).unwrap();
+        path
+    }
+
+    fn wav_bytes(channels: u16, bits_per_sample: u16, samples: &[u8]) -> Vec<u8> {
+        let sample_rate = 44_100u32;
+        let byte_rate = sample_rate * channels as u32 * bits_per_sample as u32 / 8;
+        let block_align = channels * bits_per_sample / 8;
+        let data_len = samples.len() as u32;
+
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(b"RIFF");
+        bytes.extend_from_slice(&(36 + data_len).to_le_bytes());
+        bytes.extend_from_slice(b"WAVE");
+        bytes.extend_from_slice(b"fmt ");
+        bytes.extend_from_slice(&16u32.to_le_bytes());
+        bytes.extend_from_slice(&1u16.to_le_bytes());
+        bytes.extend_from_slice(&channels.to_le_bytes());
+        bytes.extend_from_slice(&sample_rate.to_le_bytes());
+        bytes.extend_from_slice(&byte_rate.to_le_bytes());
+        bytes.extend_from_slice(&block_align.to_le_bytes());
+        bytes.extend_from_slice(&bits_per_sample.to_le_bytes());
+        bytes.extend_from_slice(b"data");
+        bytes.extend_from_slice(&data_len.to_le_bytes());
+        bytes.extend_from_slice(samples);
+        bytes
     }
 }
